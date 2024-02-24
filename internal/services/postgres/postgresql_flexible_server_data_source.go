@@ -1,23 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
-package postgres
-
-import (
-	"fmt"
-	"time"
-
-	"github.com/hashicorp/go-azure-helpers/lang/pointer"
-	"github.com/hashicorp/go-azure-helpers/lang/response"
-	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonschema"
-	"github.com/hashicorp/go-azure-helpers/resourcemanager/location"
-	"github.com/hashicorp/go-azure-helpers/resourcemanager/tags"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/postgresql/2023-06-01-preview/servers"
-	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
-	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
-	"github.com/hashicorp/terraform-provider-azurerm/internal/timeouts"
-)
-
 func dataSourcePostgresqlFlexibleServer() *pluginsdk.Resource {
 	return &pluginsdk.Resource{
 		Read: dataSourceArmPostgresqlFlexibleServerRead,
@@ -79,6 +59,14 @@ func dataSourcePostgresqlFlexibleServer() *pluginsdk.Resource {
 			"public_network_access_enabled": {
 				Type:     pluginsdk.TypeBool,
 				Computed: true,
+			},
+
+			"custom_roles": {
+				Type:     pluginsdk.TypeList,
+				Computed: true,
+				Elem: &pluginsdk.Schema{
+					Type: pluginsdk.TypeString,
+				},
 			},
 
 			"tags": commonschema.TagsDataSource(),
@@ -147,6 +135,14 @@ func dataSourceArmPostgresqlFlexibleServerRead(d *pluginsdk.ResourceData, meta i
 		}
 
 		d.Set("sku_name", sku)
+
+		if roles := model.Properties.Roles; roles != nil {
+			var customRoles []string
+			for _, role := range *roles {
+				customRoles = append(customRoles, role.Name)
+			}
+			d.Set("custom_roles", customRoles)
+		}
 
 		return tags.FlattenAndSet(d, model.Tags)
 	}
