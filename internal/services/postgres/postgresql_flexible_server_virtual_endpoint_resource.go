@@ -123,7 +123,7 @@ func (r PostgresqlFlexibleServerVirtualEndpointResource) Create() sdk.ResourceFu
 			return nil
 		},
 	}
-}
+} 
 
 func (r PostgresqlFlexibleServerVirtualEndpointResource) Read() sdk.ResourceFunc {
 	return sdk.ResourceFunc{
